@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+  </head>
+  <body style="background-color: #91c1c8;">
+    <div id="explaination">
+        <h2 style="color: rgb(0, 0, 0);">UFC 出手選擇和勝率關係圖</h2>
+        <p>因為我平常就有偶爾看看UFC的關係，對這些選手不同比賽風格和勝率的關係很有興趣。</p>
+        <p>因為不同量級的選手有不同適合的模式，這裡以攻擊手段多樣化，強者眾多的輕量級中取十位最有名選手作成動態圖表。</p>
+        <p style="color: rgb(0, 0, 0);">資料來源:UFC官網:資料統計</p>
+        <p><b>設計選擇:</b>因為資料呈現多維度，這裡以Scatter plot呈現不同數值和勝率的關係我認為較為合適。</p>
+        <p"><b>過程考量相關的經驗法則:</b>Eyes beat memory-利用動畫表示Y軸轉換對狀態的影響。如課本第六章所述，此概念適用於較少變數之資料呈現，因此在這次的視覺化過程中我加以選用。</p>
+    </div>
+    <div id="choose" style="border: 10px;background-color: #417aac;margin: 30px;color: #FFFFFF">
+		<h3><b>Y軸選擇</b></h3>
+        <p>說明:這裡以主要終結比賽的兩種手段切入:直接打擊和地面技終結。<br>其中抱摔為帶入地面戰之重要技巧，因此亦列入考量。<br>以下可選擇不同數值作為衡量:</p>
+        <select id="sel1" onchange="testChange()">
+			<option value="sLpm">每分鐘有效打擊:sLpm</option>
+			<option value="tdAvg">15分鐘內成功進行抱摔次數:tdAvg</option>
+			<option value="subAvg">15分鐘內嘗試的降伏次數:subAvg</option>
+		</select>
+        <p id="expr"><b>每分鐘有效打擊:有效打擊判定為命中未防禦部位，為地面戰中主要輸出條件,為KO率最高之主要手段。</b</p>
+	</div>
+    
+    <div class="example_div" style="background-color:#FFFFFF"></div>
+    <script>
+        //{"Name":"","Win":,"sLpm":,"tdAvg": ,"subAvg":}
+        var data=[{"Name":"Conor McGregor","Win":22/28,"sLpm":5.32,"tdAvg": 0.67,"subAvg":0.1},{"Name":"Khabib Nurmagomedov","Win":29/29,"sLpm": 4.10,"tdAvg":5.32,"subAvg":0.8}
+        ,{"Name":"Tony Ferguson","Win":26/32,"sLpm":5.15,"tdAvg":0.42 ,"subAvg":1.1},{"Name":"Charles Oliveira","Win":32/44,"sLpm":3.44,"tdAvg":2.50 ,"subAvg":2.8}
+        ,{"Name":"Justin Gaethje","Win":23/26,"sLpm": 7.50,"tdAvg":0.00 ,"subAvg":0.0},{"Name":"Dustin Poirier","Win":28/35,"sLpm":5.61,"tdAvg":1.44,"subAvg":1.2}
+        ,{"Name":"BJ Penn","Win":16/32,"sLpm":2.76,"tdAvg":1.19,"subAvg":0.5},{"Name":"Frankie Edgar","Win":23/34,"sLpm":3.79,"tdAvg":2.30,"subAvg":0.3},{"Name":"Anthony Pettis","Win":24/34,"sLpm":3.05,"tdAvg":0.61,"subAvg":1.1}
+        ,{"Name":"Eddie Alvarez","Win":29/35,"sLpm":4.32,"tdAvg":2.92,"subAvg":0.5}
+    ];
+        
+        var body = d3.select('body')
+        
+        var choose=document.getElementById("choose");
+        body.append('br')
+        
+        // Variables
+        var body = d3.select('body')
+        var margin = { top: 50, right: 50, bottom: 50, left: 80 }
+        var h = 600 - margin.top - margin.bottom
+        var w = 600 - margin.left - margin.right
+        var formatPercent = d3.format('.2%')
+
+        //Tooltip
+        var tooltip = d3.select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            .style("background", "#FFF")
+            .text("test");
+
+
+        // Scales
+        var xScale = d3.scaleLinear()
+            .domain([
+            d3.min([0.5,d3.min(data,function (d) { return d.Win })]),
+            d3.max([0,d3.max(data,function (d) { return d.Win })])
+            ])
+            .range([0,w])
+        var yScale = d3.scaleLinear()
+            .domain([
+            d3.min([0,d3.min(data,function (d) { return d.sLpm })]),
+            d3.max([0,d3.max(data,function (d) { return d.sLpm })])
+            ])
+            .range([h,0])
+        // SVG
+        var svg = d3.select(".example_div").append('svg:svg')
+            .attr('height',h + margin.top + margin.bottom)
+            .attr('width',w + margin.left + margin.right)
+            .append('g')
+            .attr('transform','translate(' + margin.left + ',' + margin.top + ')')
+            
+        
+        // X-axis scale
+        var xAxis = d3.axisBottom(xScale)  
+        // Y-axis scale
+        var yAxis = d3.axisLeft(yScale)
+        
+        //append circles
+        var circles = svg.selectAll('circle')
+        .data(data)
+        .enter()
+        .append('circle')
+        .attr('cx',function (d) { return xScale(d.Win) })
+        .attr('cy',function (d) { return yScale(d.sLpm) })
+        .attr('r','10')
+        .attr('stroke','black')
+        .attr('stroke-width',1)
+        .attr('fill','#7D7DFF')
+        .on('mouseover', function () {
+            d3.select(this)
+            .transition()
+            .duration(500)
+            .attr('r',20)
+            .attr('stroke-width',3)
+            
+        })
+        .on('mouseout', function () {
+            d3.select(this)
+            .transition()
+            .duration(500)
+            .attr('r',10)
+            .attr('stroke-width',1)
+            
+        })
+        .append('title') // Tooltip
+            .text(function (d) { return d.Name +
+                           '\nWin Percentage: ' + formatPercent(d.Win) +
+                           '\nSignificant Strikes Landed per Minute: ' + d.sLpm +
+                           '\nAverage Takedowns Landed per 15 minutes: ' + d.tdAvg })
+        //drawing X-axis
+        svg.append('g')
+        .attr('class','axis')
+        .attr('id','xAxis')
+        .attr('transform', 'translate(0,' + h + ')')
+        .call(xAxis)
+        //x-Axis Label
+        svg.append("text")
+        .attr("x", 480)
+        .attr("y", 530)
+        .attr("text-anchor", "right")
+        .style("font-size", "12px")
+        .style("fill", "black")
+        .style("max-width", 400)
+        .text("勝率");
+        
+        //drawing Y-axis
+        svg.append('g')
+        .attr('class','axis')
+        .attr('id','yAxis')
+        .call(yAxis)
+        // y-Axis Label
+        svg.append("text")
+        .attr("x", -70)
+        .attr("y", -10)
+        .attr("id","yAxisLabel")
+        .attr("text-anchor", "left")
+        .style("font-size", "12px")
+        .style("fill", "#black")
+        .style("max-width", 400)
+        .text("每分鐘有效打擊");
+        
+        //P.S
+        svg.append("text")
+        .attr("x", 280)
+        .attr("y", -30)
+        .attr("id","yAxisLabel")
+        .attr("text-anchor", "left")
+        .style("font-size", "12px")
+        .style("fill", "#black")
+        .style("max-width", 400)
+        .text("註:各點滑鼠懸停可查看選手名稱和各項數值");
+        
+
+        function testChange(){
+            var d1 = document.getElementById("sel1").value;
+            var text="";
+            var explainationText="";
+            switch(d1){
+                case"sLpm":
+                    yScale // change the yScale
+                    .domain([
+                        d3.min([0,d3.min(data,function (d) { return d.sLpm })]),
+                        d3.max([0,d3.max(data,function (d) { return d.sLpm })])
+                    ])
+                    d3.selectAll('circle') // move the circles
+                    .transition().duration(1000)
+                    .delay(function (d,i) { return i*100})
+                        .attr('cy',function (d) { return yScale(d.sLpm) })
+                    text='每分鐘有效打擊';
+                    explainationText="<b>每分鐘有效打擊:有效打擊判定為命中未防禦部位，為地面戰中主要輸出條件,為KO率最高之主要手段。</b>";
+                    break;
+                case"tdAvg":
+                    yScale // change the yScale
+                    .domain([
+                        d3.min([0,d3.min(data,function (d) { return d.tdAvg })]),
+                        d3.max([0,d3.max(data,function (d) { return d.tdAvg })])
+                    ])
+                    d3.selectAll('circle') // move the circles
+                    .transition().duration(1000)
+                    .delay(function (d,i) { return i*100})
+                        .attr('cy',function (d) { return yScale(d.tdAvg) })
+                    text='成功進行抱摔次數(per 15 min)'
+                    explainationText="<b>抱摔為帶入地面最主要之手段，之後能夠進行直接攻擊或試圖進行降伏技，為一大重要技巧，抱摔嘗試越多代表該選手在比賽中採取積極壓迫的節奏。</b>"
+                    break;
+                case"subAvg":
+                    yScale // change the yScale
+                    .domain([
+                        d3.min([0,d3.min(data,function (d) { return d.subAvg })]),
+                        d3.max([0,d3.max(data,function (d) { return d.subAvg })])
+                    ])
+                    d3.selectAll('circle') // move the circles
+                    .transition().duration(1000)
+                    .delay(function (d,i) { return i*100})
+                        .attr('cy',function (d) { return yScale(d.subAvg) })
+                    text="降伏嘗試頻率(per 15 min)";
+                    explainationText="<b>降伏成功基本上能一舉扭轉戰局，且難以掙脫，降伏嘗試頻率越高，則選手在地面戰中身位把控越好，得以試圖進行絞技</b>"
+                    break;
+            }
+            yAxis.scale(yScale) // change the yScale
+            d3.select('#yAxis') // redraw the yAxis
+            .transition().duration(1000)
+            .call(yAxis)
+
+            d3.select('#yAxisLabel') // change the yAxisLabel
+            .text(text)
+
+            document.getElementById("expr").innerHTML=explainationText;
+        }
+    </script>
+    <div style="border: 10px;background-color: #417aac;margin: 30px;color: #FFFFFF;">
+        <h3><b>小結</b></h3>
+        <p>由表可見基本可將選手分為立技型，地面型及沒有特別突出的全能型選手，尤其地面選手抱摔的頻率不會太低。</p>
+        <p>由上表亦可見，在某專項較為突出的選手通常勝率較高。</p>
+    </div>
+  </body>
+</html>
