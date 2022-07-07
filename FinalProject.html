@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="chartStyle.css">
+<head>
+    <title>
+		Bruh-Page
+	</title>
+</head>
+<body class="body">
+  
+<script src='https://d3js.org/d3.v6.min.js'></script>
+<script src="https://jsuites.net/v4/jsuites.js"></script>
+<script src="https://jsuites.net/v4/jsuites.webcomponents.js"></script>
+<link rel="stylesheet" href="https://jsuites.net/v4/jsuites.css" type="text/css" /> 
+
+<div id="head" class="header">
+    <h1 id="VName"></h1>
+</div>
+<div id="num"></div>
+<div id="middle" class="header">
+    <p>請選擇開台日期</p>
+</div>
+<div id="calendar" class="Jcalendar">
+    <jsuites-calendar value="2022-06-10" format="DD/MM/YYYY"></jsuites-calendar>
+</div>
+
+
+<div id="attr" class="firstChart">
+    <p id="explaination">請選擇開台日期</p>
+    <p id="title"></p>
+</div>
+<div id="RadarChart" class="secondChart"></div>
+
+<script src="chartJS.js"></script>
+
+
+</body>
+
+</html>

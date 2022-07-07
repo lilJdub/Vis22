@@ -1,0 +1,21 @@
+.body{
+    background-color: #C4E1FF;
+}
+.header{
+    background-color:#74cfe2;
+    font-weight: bold;
+    padding: 5px;
+}
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;    }
+.Jcalender{
+    background-color:#74cfe2;
+}
+.firstChart{
+    font-weight: bold;
+}
+.secondChart{
+    font-weight: bold;
+}
